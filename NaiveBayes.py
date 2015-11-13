@@ -18,6 +18,7 @@ class NaiveBayes(object):
 		self.yCounts = {lab:0 for lab in trainset.labels}
 
 
+
 	def train(self):
 		"""
 		gets all of the counts for the various things
@@ -32,3 +33,56 @@ class NaiveBayes(object):
 				attrib = self.trainset.attributes[i]
 				val = instance[i]
 				self.xGivenYCounts[lab][attrib][val] += 1
+
+
+
+	def classify(self, instList):
+		"""
+		returns a list of predicted classes for each instance in instList
+		"""
+
+		instClasses = []
+		for inst in instList:
+
+			ps_y_given_x = {}
+			# need to calculate a probability associated with each label
+			for lab in self.trainset.labels:
+
+				numer = float((self.yCounts[lab]+1)) / \
+				(sum(self.yCounts.values()) + len(self.yCounts.values()))
+
+				for i in range(len(inst)-1):
+					attrib = self.trainset.attributes[i]
+					numer *= getPofX(attrib, inst[i], lab, len(instList))
+
+				
+
+
+
+
+
+	def getPofX(self, attrib, attribVal, lab, numInst):
+		"""
+		returns a laplace smoothed estimate of the probability of X = x
+		given Y = y
+		"""
+		numerator = self.xGivenYCounts[lab][attrib][attribVal] + 1
+		denominator = 0
+		for label in self.trainset.labels:
+			denominator += 1 self.yCounts[label]
+		return float(numerator)/denominator
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
