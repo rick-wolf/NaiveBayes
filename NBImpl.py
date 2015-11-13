@@ -56,7 +56,27 @@ def main(argv):
 
 	trainfile = ''
 	testfile  = ''
-	
+	mode      = ''
+
+	# validate input
+	if len(sys.argv) == 4:
+		trainfile = sys.argv[1]
+		testfile  = sys.argv[2]
+		mode      = sys.argv[3]
+	else:
+		print("incorrect input supplied")
+		sys.exit()
+
+
+	# ingest data
+	trainset = readFile(trainfile)
+	testset  = readFile(testfile)
+
+
+	for instance in trainset.instances:
+		print instance
+	print trainset.labels
+	print trainset.attributeValues
 
 
 
