@@ -11,6 +11,7 @@ Rick Wolf
 import sys
 import math
 from Dataset import Dataset
+from NaiveBayes import NaiveBayes
 
 
 
@@ -35,6 +36,7 @@ def readFile(fname):
 					line = [word.lstrip("{ '\t").rstrip("} ',\t") for word in line.split() if word != '{']
 					if (line[1].lower() == "class"):
 						labels = line[2:]
+						labels = [x for x in labels if x] # removes any empty strings
 					else:
 						attributes.append(line[1]) # the name will always be the second item
 						attributeValues[line[1]] = line[2:] #the third to end of the list is the values
@@ -72,13 +74,27 @@ def main(argv):
 	trainset = readFile(trainfile)
 	testset  = readFile(testfile)
 
-
+	y1 = 0
+	y2 = 0
 	for instance in trainset.instances:
-		print instance
-	print trainset.labels
-	print trainset.attributeValues
+		if instance[-1] == trainset.labels[0]:
+			y1 +=1
+		else:
+			y2 +=1
+	#print trainset.labels
+	#print trainset.attributeValues
+	print trainset.labels[0], y1
+	print trainset.labels[1], y2
+
+	bayes = NaiveBayes(trainset, testset)
+	bayes.train()
+	print bayes.yCounts
+	print bayes.xGivenYCounts[trainset.labels[0]]['bl_of_lymph_c'].values()
+	print bayes.xGivenYCounts[trainset.labels[1]]['bl_of_lymph_c'].values()
 
 
+if __name__ == '__main__':
+	main(sys.argv)
 
 
 
