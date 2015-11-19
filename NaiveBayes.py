@@ -19,6 +19,7 @@ class NaiveBayes(object):
 
 
 
+
 	def train(self):
 		"""
 		gets all of the counts for the various things
@@ -38,7 +39,8 @@ class NaiveBayes(object):
 
 	def classify(self, instList):
 		"""
-		returns a list of predicted classes for each instance in instList
+		returns a list of tuples:
+		the predicted class and its probability
 		"""
 
 		instClasses = []
@@ -50,26 +52,48 @@ class NaiveBayes(object):
 
 				numer = float((self.yCounts[lab]+1)) / \
 				(sum(self.yCounts.values()) + len(self.yCounts.values()))
+				#numer = float((self.yCounts[lab])) / (sum(self.yCounts.values()))
 
 				for i in range(len(inst)-1):
 					attrib = self.trainset.attributes[i]
-					numer *= getPofX(attrib, inst[i], lab, len(instList))
+					numer *= self.getPofX(attrib, inst[i], lab)
 
-				
+				denom = 0
+				for lab1 in self.trainset.labels:
+					tmpDenom = float((self.yCounts[lab1]+1)) / \
+					(sum(self.yCounts.values()) + len(self.yCounts.values()))
+					#tmpDenom = float((self.yCounts[lab])) / (sum(self.yCounts.values()))
+
+					for i in range(len(inst)-1):
+						attrib = self.trainset.attributes[i]
+						tmpDenom *= self.getPofX(attrib, inst[i], lab1)
+
+					denom += tmpDenom
+				ps_y_given_x[lab] = numer/denom
+
+			# get the max probability class
+			maxClass = ''
+			maxProb  = float("-inf")
+			for key in self.trainset.labels:
+				if ps_y_given_x[key] > maxProb:
+					maxClass = key
+					maxProb  = ps_y_given_x[key]
+
+			tmp = [maxClass, maxProb]
+			instClasses.append(tmp)
+
+		return instClasses
 
 
 
 
-
-	def getPofX(self, attrib, attribVal, lab, numInst):
+	def getPofX(self, attrib, attribVal, lab):
 		"""
 		returns a laplace smoothed estimate of the probability of X = x
 		given Y = y
 		"""
-		numerator = self.xGivenYCounts[lab][attrib][attribVal] + 1
-		denominator = 0
-		for label in self.trainset.labels:
-			denominator += 1 self.yCounts[label]
+		numerator = self.xGivenYCounts[lab][attrib][attribVal] +1
+		denominator = self.yCounts[lab] + len(self.trainset.labels) 
 		return float(numerator)/denominator
 
 

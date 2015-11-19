@@ -12,6 +12,7 @@ import sys
 import math
 from Dataset import Dataset
 from NaiveBayes import NaiveBayes
+from TAN import TAN
 
 
 
@@ -42,6 +43,7 @@ def readFile(fname):
 						attributeValues[line[1]] = line[2:] #the third to end of the list is the values
 				elif  not (line.startswith("@")):
 					line = line.split(',')
+					line = [word.lstrip("{ '\t").rstrip("} ',\t") for word in line]
 					newline = []
 					for i in range(len(attributes)):
 						if len(attributeValues[attributes[i]]) == 1:
@@ -81,16 +83,29 @@ def main(argv):
 			y1 +=1
 		else:
 			y2 +=1
-	#print trainset.labels
+	print len(trainset.instances)
 	#print trainset.attributeValues
-	print trainset.labels[0], y1
-	print trainset.labels[1], y2
+	#print trainset.labels[0], y1
+	#print trainset.labels[1], y2
 
 	bayes = NaiveBayes(trainset, testset)
 	bayes.train()
-	print bayes.yCounts
-	print bayes.xGivenYCounts[trainset.labels[0]]['bl_of_lymph_c'].values()
-	print bayes.xGivenYCounts[trainset.labels[1]]['bl_of_lymph_c'].values()
+	#print bayes.yCounts
+	#print bayes.xGivenYCounts[trainset.labels[0]]['bl_of_lymph_c'].values()
+	#print bayes.xGivenYCounts[trainset.labels[1]]['bl_of_lymph_c'].values()
+
+	preds = bayes.classify(testset.instances)
+
+	corCount = 0
+	for i in range(len(preds)):
+		print preds[i][0], testset.instances[i][-1], preds[i][1]
+		if preds[i][0] == testset.instances[i][-1]:
+			corCount += 1
+
+	print corCount
+	#tan = TAN(trainset, trainset)
+	#tmp = tan.initializeGraph()
+	#print tmp
 
 
 if __name__ == '__main__':
