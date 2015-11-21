@@ -13,6 +13,7 @@ import math
 from Dataset import Dataset
 from NaiveBayes import NaiveBayes
 from TAN import TAN
+import random
 
 
 
@@ -76,43 +77,32 @@ def main(argv):
 	trainset = readFile(trainfile)
 	testset  = readFile(testfile)
 
-	y1 = 0
-	y2 = 0
-	for instance in trainset.instances:
-		if instance[-1] == trainset.labels[0]:
-			y1 +=1
-		else:
-			y2 +=1
-	print len(trainset.instances)
-	if mode == "n":
-		print trainset.attributeValues
-		print trainset.labels[0], y1
-		print trainset.labels[1], y2
-
-		bayes = NaiveBayes(trainset, testset)
-		bayes.train(trainset.instances)
-		#print bayes.yCounts
-		#print bayes.xGivenYCounts[trainset.labels[0]]['bl_of_lymph_c'].values()
-		#print bayes.xGivenYCounts[trainset.labels[1]]['bl_of_lymph_c'].values()
-
-		preds = bayes.classify(testset.instances)
-
-		corCount = 0
-		for i in range(len(preds)):
-			print preds[i][0], testset.instances[i][-1], preds[i][1]
-			if preds[i][0] == testset.instances[i][-1]:
-				corCount += 1
-
-		print corCount
 	
-	if mode == "t":
-		tan = TAN(trainset, trainset)
-		edges = tan.initializeGraph()
-		prim = tan.growPrim(edges)
-		#print prim[1]
-		for q in prim[1]:
-			print q[1], q[0]
+	
+	# train on random subsets of the data
+	sizes = [25, 50, 100]
+	accs = []
+	for size in sizes:
+		tmpAcc = []
+		for j in range(4):
+			tmpSet = random.sample(trainset.instances, size)
 
+			bayes = NaiveBayes(trainset, testset)
+			bayes.train(tmpSet)
+
+			preds = bayes.classify(testset.instances)
+
+			corCount = 0
+			for i in range(len(preds)):
+				#print preds[i][0], testset.instances[i][-1], preds[i][1]
+				if preds[i][0] == testset.instances[i][-1]:
+					corCount += 1
+
+			print size, j, corCount
+			tmpAcc.append(corCount)
+		meanAcc = float(sum(tmpAcc)) / len(tmpAcc)
+		accs.append([size, meanAcc])
+	
 
 if __name__ == '__main__':
 	main(sys.argv)

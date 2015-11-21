@@ -20,12 +20,13 @@ class NaiveBayes(object):
 
 
 
-	def train(self):
+	def train(self, trainset):
 		"""
 		gets all of the counts for the various things
 		"""
 		# loop through instances
-		for instance in self.trainset.instances:
+		#for instance in self.trainset.instances:
+		for instance in trainset:
 			lab = instance[-1]
 			self.yCounts[lab] += 1
 
@@ -92,8 +93,8 @@ class NaiveBayes(object):
 		returns a laplace smoothed estimate of the probability of X = x
 		given Y = y
 		"""
-		numerator = self.xGivenYCounts[lab][attrib][attribVal] +1
-		denominator = self.yCounts[lab] + len(self.trainset.labels) 
+		numerator = self.xGivenYCounts[lab][attrib][attribVal] + 1
+		denominator = self.yCounts[lab] + len(self.trainset.attributeValues[attrib]) 
 		return float(numerator)/denominator
 
 
