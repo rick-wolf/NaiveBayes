@@ -76,14 +76,14 @@ def main(argv):
 	trainset = readFile(trainfile)
 	testset  = readFile(testfile)
 
-	y1 = 0
-	y2 = 0
-	for instance in trainset.instances:
-		if instance[-1] == trainset.labels[0]:
-			y1 +=1
-		else:
-			y2 +=1
-	print len(trainset.instances)
+	# y1 = 0
+	# y2 = 0
+	# for instance in trainset.instances:
+	# 	if instance[-1] == trainset.labels[0]:
+	# 		y1 +=1
+	# 	else:
+	# 		y2 +=1
+	
 	if mode == "n":
 		print trainset.attributeValues
 		print trainset.labels[0], y1
@@ -109,10 +109,23 @@ def main(argv):
 		tan = TAN(trainset, trainset)
 		edges = tan.initializeGraph()
 		prim = tan.growPrim(edges)
-		#print prim[1]
-		for q in prim[1]:
-			print q[1], q[0]
+		
+		tan.setParentList(prim[1])
+		for attrib in trainset.attributes:
+			if tan.parentList[attrib]:
+				print attrib, tan.parentList[attrib][0], 'class'
+			else:
+				print attrib, 'class'
+		preds = tan.classify(testset.instances)
+		print ''
+		corCount = 0
+		for i in range(len(preds)):
+			print preds[i][0], testset.instances[i][-1], preds[i][1]
+			if preds[i][0] == testset.instances[i][-1]:
+				corCount += 1
 
+		print ''
+		print corCount
 
 if __name__ == '__main__':
 	main(sys.argv)

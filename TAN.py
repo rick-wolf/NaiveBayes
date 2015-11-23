@@ -12,6 +12,7 @@ class TAN(NaiveBayes):
 	def __init__(self, trainset, testset):
 		NaiveBayes.__init__(self, trainset, testset)
 		self.train(trainset.instances)
+		
 
 
 
@@ -75,6 +76,95 @@ class TAN(NaiveBayes):
 			eNew.append(edges[maxInd])
 
 		return (vNew, eNew)
+
+
+
+	def setParentList(self, edges):
+		"""
+		returns a dict with attributes as keys and parents of those attributes
+		as values
+		"""
+		self.parentList = {}
+
+		for attrib in self.trainset.attributes:
+			self.parentList[attrib] = []
+
+			for edge in edges:
+				if edge[1] == attrib:
+					self.parentList[attrib].append(edge[0])
+			#self.parentList[attrib].append('class')
+
+
+
+	def classify(self, instList):
+
+		instClasses = []
+		for inst in instList:
+			ps_y_given_x = {}
+			# need to calculate a probability associated with each label
+			for lab in self.trainset.labels:
+
+				numer = float((self.yCounts[lab]+1)) / \
+				(sum(self.yCounts.values()) + len(self.yCounts.values()))
+				
+				for i in range(len(inst)-1):
+					attrib = self.trainset.attributes[i]
+					numer *= self.getProbXgivenParents(attrib, inst[i], lab, inst)
+
+				denom = 0
+				for lab1 in self.trainset.labels:
+					tmpDenom = float((self.yCounts[lab1]+1)) / \
+					(sum(self.yCounts.values()) + len(self.yCounts.values()))
+					
+					for i in range(len(inst)-1):
+						attrib = self.trainset.attributes[i]
+						tmpDenom *= self.getProbXgivenParents(attrib, inst[i], lab1, inst)
+
+					denom += tmpDenom
+				
+				ps_y_given_x[lab] = numer/denom
+
+			# get the max probability class
+			maxClass = ''
+			maxProb  = float("-inf")
+			for key in self.trainset.labels:
+				if ps_y_given_x[key] > maxProb:
+					maxClass = key
+					maxProb  = ps_y_given_x[key]
+
+			tmp = [maxClass, maxProb]
+			instClasses.append(tmp)
+
+		return instClasses
+
+
+
+	def getProbXgivenParents(self, attrib, attribVal, lab, inst):
+
+		p = 1
+		parents = self.parentList[attrib]
+		attribInd = self.trainset.attributes.index(attrib)
+
+		if parents:
+			parentInd = self.trainset.attributes.index(parents[0])
+			xi = inst[parentInd]
+
+			jpCount = 0
+			parentsCount = 0
+			for inst in self.trainset.instances:
+				if (inst[attribInd] == attribVal) and (inst[parentInd] == xi) and (inst[-1] == lab):
+					jpCount += 1
+					parentsCount += 1
+				elif (inst[parentInd] == xi) and (inst[-1] == lab):
+					parentsCount += 1
+			jpc = float(jpCount+1)/(parentsCount + \
+				(len(self.trainset.attributeValues[attrib]) ))
+			p *= jpc
+		else:
+			p = self.getPofX(attrib, attribVal, lab)
+
+		return p
+
 
 
 

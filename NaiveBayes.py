@@ -6,9 +6,11 @@ class NaiveBayes(object):
 
 
 
-	def __init__(self, trainset, testset):
+	def __init__(self, trainset, testset, instList=None):
 		self.trainset = trainset
 		self.testset  = testset
+		if instList:
+			self.trainset.instances = instList
 
 		# make a dict of dicts of dicts, where outermost keys are labels
 		# outer keys are attrib names,
@@ -53,8 +55,7 @@ class NaiveBayes(object):
 
 				numer = float((self.yCounts[lab]+1)) / \
 				(sum(self.yCounts.values()) + len(self.yCounts.values()))
-				#numer = float((self.yCounts[lab])) / (sum(self.yCounts.values()))
-
+				
 				for i in range(len(inst)-1):
 					attrib = self.trainset.attributes[i]
 					numer *= self.getPofX(attrib, inst[i], lab)
@@ -63,13 +64,13 @@ class NaiveBayes(object):
 				for lab1 in self.trainset.labels:
 					tmpDenom = float((self.yCounts[lab1]+1)) / \
 					(sum(self.yCounts.values()) + len(self.yCounts.values()))
-					#tmpDenom = float((self.yCounts[lab])) / (sum(self.yCounts.values()))
-
+					
 					for i in range(len(inst)-1):
 						attrib = self.trainset.attributes[i]
 						tmpDenom *= self.getPofX(attrib, inst[i], lab1)
 
 					denom += tmpDenom
+				
 				ps_y_given_x[lab] = numer/denom
 
 			# get the max probability class
